@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClearPath Fugitive Intelligence Dashboard</title>
+<style>
+:root{--navy:#0D2F5B;--gold:#C8A24A;--bg:#eef2f6;--white:#fff;--red:#b91c1c;--green:#166534}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#1f2937}
+header{background:var(--navy);color:#fff;padding:14px;position:sticky;top:0;z-index:20}
+header h1{margin:0;font-size:20px}
+header p{margin:4px 0 0;font-size:12px;opacity:.9}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px;background:#dbe3ec;position:sticky;top:64px;z-index:19}
+.tabbtn{border:none;border-radius:10px;padding:10px 6px;background:#fff;color:var(--navy);font-weight:700;font-size:12px}
+.tabbtn.active{background:var(--navy);color:#fff}
+main{padding:12px}
+.tab{display:none}.tab.active{display:block}
+.card{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card h2{margin:0 0 10px;color:var(--navy);font-size:18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:12px;font-weight:700;margin-bottom:4px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cdd5df;border-radius:10px;font-size:14px}
+textarea{min-height:72px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button.action{border:none;border-radius:10px;padding:10px 14px;font-weight:700}
+.save{background:var(--navy);color:#fff}.clear{background:#ddd}.danger{background:var(--red);color:#fff}.export{background:var(--gold)}
+.listitem{border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin-top:8px;background:#fafafa}
+.small{font-size:12px;color:#555}
+.pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700}
+.low{background:#dcfce7;color:#166534}.mod{background:#fef3c7;color:#92400e}.high{background:#fee2e2;color:#b91c1c}
+.statwrap{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat{background:#f8fafc;border-left:5px solid var(--gold);border-radius:12px;padding:12px}
+.stat .num{font-size:22px;font-weight:700;color:var(--navy)}
+.footer-note{font-size:11px;color:#666;text-align:center;padding:16px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.tabs{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>ClearPath Fugitive Intelligence Dashboard</h1>
+  <p>Targets • Associates • Addresses • Vehicles • Surveillance • Action Plan</p>
+</header>
+
+<div class="tabs">
+  <button class="tabbtn active" data-tab="overview">Overview</button>
+  <button class="tabbtn" data-tab="target">Target</button>
+  <button class="tabbtn" data-tab="associates">Associates</button>
+  <button class="tabbtn" data-tab="locations">Locations</button>
+  <button class="tabbtn" data-tab="vehicles">Vehicles</button>
+  <button class="tabbtn" data-tab="surveillance">Surveillance</button>
+  <button class="tabbtn" data-tab="action">Action Plan</button>
+  <button class="tabbtn" data-tab="notes">Notes</button>
+</div>
+
+<main>
+<section id="overview" class="tab active">
+  <div class="card">
+    <h2>Case Snapshot</h2>
+    <div class="statwrap">
+      <div class="stat"><div class="small">Open Targets</div><div class="num" id="statTargets">0</div></div>
+      <div class="stat"><div class="small">Associates Logged</div><div class="num" id="statAssociates">0</div></div>
+      <div class="stat"><div class="small">Locations Logged</div><div class="num" id="statLocations">0</div></div>
+      <div class="stat"><div class="small">Vehicles Logged</div><div class="num" id="statVehicles">0</div></div>
+      <div class="stat"><div class="small">Surveillance Entries</div><div class="num" id="statSurv">0</div></div>
+      <div class="stat"><div class="small">Action Steps</div><div class="num" id="statActions">0</div></div>
+    </div>
+    <div class="btnrow">
+      <button class="action export" id="exportBtn">Export Backup</button>
+      <button class="action clear" id="importBtn">Import Backup</button>
+      <button class="action danger" id="wipeBtn">Wipe Dashboard</button>
+    </div>
+  </div>
+  <div class="card"><h2>Priority Targets</h2><div id="priorityPreview" class="small">No targets yet.</div></div>
+  <div class="card"><h2>Next Action Steps</h2><div id="actionPreview" class="small">No action steps yet.</div></div>
+</section>
+
+<section id="target" class="tab">
+  <div class="card">
+    <h2>Target Profile</h2>
+    <div class="grid">
+      <div><label>Defendant Name</label><input id="t_name"></div>
+      <div><label>DOB</label><input id="t_dob" type="date"></div>
+      <div><label>Bond Amount</label><input id="t_bond" type="number" step="0.01"></div>
+      <div><label>Charges</label><input id="t_charges"></div>
+      <div><label>County</label><input id="t_county"></div>
+      <div><label>Court Date</label><input id="t_court" type="date"></div>
+      <div><label>Phone Numbers</label><input id="t_phone"></div>
+      <div><label>Email</label><input id="t_email"></div>
+      <div><label>Last Known Address</label><input id="t_address"></div>
+      <div><label>Employer</label><input id="t_employer"></div>
+      <div><label>Priority</label><select id="t_priority"><option>Low</option><option>Medium</option><option>High</option></select></div>
+      <div><label>Status</label><select id="t_status"><option>Open</option><option>Working</option><option>Located</option><option>Closed</option></select></div>
+      <div style="grid-column:1/-1"><label>Notes</label><textarea id="t_notes"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="saveTargetBtn">Save Target</button>
+      <button class="action clear" id="clearTargetBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card"><h2>Targets</h2><div id="targetList" class="small">No targets yet.</div></div>
+</section>
+
+<section id="associates" class="tab">
+  <div class="card">
+    <h2>Associate Entry</h2>
+    <div class="grid">
+      <div><label>Target</label><input id="a_target"></div>
+      <div><label>Name</label><input id="a_name"></div>
+      <div><label>Relationship</label><input id="a_relation"></div>
+      <div><label>Phone</label><input id="a_phone"></div>
+      <div><label>Address</label><input id="a_address"></div>
+      <div><label>Employer</label><input id="a_employer"></div>
+      <div><label>Priority</label><select id="a_priority"><option>Low</option><option>Medium</option><option>High</option></select></div>
+      <div><label>Notes</label><textarea id="a_notes"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="saveAssociateBtn">Save Associate</button>
+      <button class="action clear" id="clearAssociateBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card"><h2>Associates</h2><div id="associateList" class="small">No associates yet.</div></div>
+</section>
+
+<section id="locations" class="tab">
+  <div class="card">
+    <h2>Location Lead</h2>
+    <div class="grid">
+      <div><label>Target</label><input id="l_target"></div>
+      <div><label>Location Name</label><input id="l_name"></div>
+      <div><label>Type</label><select id="l_type"><option>Home</option><option>Work</option><option>Family</option><option>Partner</option><option>Friend</option><option>Other</option></select></div>
+      <div><label>Address</label><input id="l_address"></div>
+      <div><label>Best Time To Check</label><input id="l_time"></div>
+      <div><label>Source</label><input id="l_source"></div>
+      <div><label>Priority</label><select id="l_priority"><option>Low</option><option>Medium</option><option>High</option></select></div>
+      <div><label>Notes</label><textarea id="l_notes"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="saveLocationBtn">Save Location</button>
+      <button class="action clear" id="clearLocationBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card"><h2>Locations</h2><div id="locationList" class="small">No locations yet.</div></div>
+</section>
+
+<section id="vehicles" class="tab">
+  <div class="card">
+    <h2>Vehicle Entry</h2>
+    <div class="grid">
+      <div><label>Target</label><input id="v_target"></div>
+      <div><label>Vehicle</label><input id="v_vehicle" placeholder="2015 Altima white"></div>
+      <div><label>Plate</label><input id="v_plate"></div>
+      <div><label>Registered To</label><input id="v_registered"></div>
+      <div><label>Last Seen</label><input id="v_lastseen"></div>
+      <div><label>Location</label><input id="v_location"></div>
+      <div><label>Priority</label><select id="v_priority"><option>Low</option><option>Medium</option><option>High</option></select></div>
+      <div><label>Notes</label><textarea id="v_notes"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="saveVehicleBtn">Save Vehicle</button>
+      <button class="action clear" id="clearVehicleBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card"><h2>Vehicles</h2><div id="vehicleList" class="small">No vehicles yet.</div></div>
+</section>
+
+<section id="surveillance" class="tab">
+  <div class="card">
+    <h2>Surveillance Log Entry</h2>
+    <div class="grid">
+      <div><label>Date</label><input id="s_date" type="date"></div>
+      <div><label>Target</label><input id="s_target"></div>
+      <div><label>Location</label><input id="s_location"></div>
+      <div><label>Vehicle Seen</label><input id="s_vehicle"></div>
+      <div><label>People Seen</label><input id="s_people"></div>
+      <div><label>Activity</label><input id="s_activity"></div>
+      <div><label>Follow-Up Needed</label><select id="s_follow"><option>No</option><option>Yes</option></select></div>
+      <div><label>Notes</label><textarea id="s_notes"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="saveSurvBtn">Save Surveillance</button>
+      <button class="action clear" id="clearSurvBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card"><h2>Surveillance Log</h2><div id="survList" class="small">No surveillance entries yet.</div></div>
+</section>
+
+<section id="action" class="tab">
+  <div class="card">
+    <h2>Action Plan Entry</h2>
+    <div class="grid">
+      <div><label>Target</label><input id="p_target"></div>
+      <div><label>Step #</label><input id="p_step" type="number"></div>
+      <div><label>Action</label><input id="p_action"></div>
+      <div><label>Location</label><input id="p_location"></div>
+      <div><label>Team Needed</label><input id="p_team"></div>
+      <div><label>Risk Level</label><select id="p_risk"><option>Low</option><option>Moderate</option><option>High</option></select></div>
+      <div><label>Status</label><select id="p_status"><option>Open</option><option>In Progress</option><option>Done</option></select></div>
+      <div><label>Notes</label><textarea id="p_notes"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="savePlanBtn">Save Action Step</button>
+      <button class="action clear" id="clearPlanBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card"><h2>Action Plan</h2><div id="planList" class="small">No action steps yet.</div></div>
+</section>
+
+<section id="notes" class="tab">
+  <div class="card">
+    <h2>Case Notes</h2>
+    <div class="grid">
+      <div><label>Target</label><input id="n_target"></div>
+      <div><label>Date</label><input id="n_date" type="date"></div>
+      <div style="grid-column:1/-1"><label>Note</label><textarea id="n_note"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="saveNoteBtn">Save Note</button>
+      <button class="action clear" id="clearNoteBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card"><h2>Notes Log</h2><div id="noteList" class="small">No notes yet.</div></div>
+</section>
+</main>
+
+<div class="footer-note">This dashboard organizes intelligence you enter manually. It does not automatically connect to outside databases by itself.</div>
+
+<script>
+(function(){
+const K={targets:'fi_targets',associates:'fi_associates',locations:'fi_locations',vehicles:'fi_vehicles',surv:'fi_surv',plan:'fi_plan',notes:'fi_notes'};
+const $=id=>document.getElementById(id);
+const get=k=>JSON.parse(localStorage.getItem(k)||'[]');
+const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const esc=s=>String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const pill=(v)=>{ const t=String(v||''); const l=t.toLowerCase(); let c='low'; if(l.includes('high')) c='high'; else if(l.includes('mod')||l.includes('med')) c='mod'; return '<span class="pill '+c+'">'+esc(t)+'</span>'; };
+
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+  const tab=document.getElementById(id), btn=document.querySelector('.tabbtn[data-tab="'+id+'"]');
+  if(tab) tab.classList.add('active'); if(btn) btn.classList.add('active');
+}
+document.querySelectorAll('.tabbtn').forEach(btn=>btn.addEventListener('click',()=>showTab(btn.dataset.tab)));
+
+function removeItem(key,idx){ const a=get(key); a.splice(idx,1); set(key,a); renderAll(); }
+document.addEventListener('click', e => { if(e.target.matches('[data-del]')) removeItem(e.target.getAttribute('data-del'), Number(e.target.getAttribute('data-idx'))); });
+
+function exportData(){
+  const payload={}; Object.keys(K).forEach(k=>payload[k]=get(K[k]));
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='clearpath-fugitive-intel-backup.json'; a.click();
+}
+function importData(){
+  const input=document.createElement('input'); input.type='file'; input.accept='.json,application/json';
+  input.onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{ try{ const d=JSON.parse(r.result); Object.keys(K).forEach(k=>set(K[k], d[k]||[])); renderAll(); alert('Backup imported.'); } catch(err){ alert('Import failed.'); } };
+    r.readAsText(f);
+  };
+  input.click();
+}
+function wipeAll(){ if(confirm('Delete all dashboard data?')){ Object.values(K).forEach(k=>localStorage.removeItem(k)); renderAll(); } }
+
+function saveTarget(){ const a=get(K.targets); a.unshift({name:$('t_name').value,dob:$('t_dob').value,bond:$('t_bond').value,charges:$('t_charges').value,county:$('t_county').value,court:$('t_court').value,phone:$('t_phone').value,email:$('t_email').value,address:$('t_address').value,employer:$('t_employer').value,priority:$('t_priority').value,status:$('t_status').value,notes:$('t_notes').value}); set(K.targets,a); clearTarget(); renderAll(); }
+function clearTarget(){ ['t_name','t_dob','t_bond','t_charges','t_county','t_court','t_phone','t_email','t_address','t_employer','t_notes'].forEach(id=>$(id).value=''); $('t_priority').value='Low'; $('t_status').value='Open'; }
+
+function saveAssociate(){ const a=get(K.associates); a.unshift({target:$('a_target').value,name:$('a_name').value,relation:$('a_relation').value,phone:$('a_phone').value,address:$('a_address').value,employer:$('a_employer').value,priority:$('a_priority').value,notes:$('a_notes').value}); set(K.associates,a); clearAssociate(); renderAll(); }
+function clearAssociate(){ ['a_target','a_name','a_relation','a_phone','a_address','a_employer','a_notes'].forEach(id=>$(id).value=''); $('a_priority').value='Low'; }
+
+function saveLocation(){ const a=get(K.locations); a.unshift({target:$('l_target').value,name:$('l_name').value,type:$('l_type').value,address:$('l_address').value,time:$('l_time').value,source:$('l_source').value,priority:$('l_priority').value,notes:$('l_notes').value}); set(K.locations,a); clearLocation(); renderAll(); }
+function clearLocation(){ ['l_target','l_name','l_address','l_time','l_source','l_notes'].forEach(id=>$(id).value=''); $('l_type').value='Home'; $('l_priority').value='Low'; }
+
+function saveVehicle(){ const a=get(K.vehicles); a.unshift({target:$('v_target').value,vehicle:$('v_vehicle').value,plate:$('v_plate').value,registered:$('v_registered').value,lastseen:$('v_lastseen').value,location:$('v_location').value,priority:$('v_priority').value,notes:$('v_notes').value}); set(K.vehicles,a); clearVehicle(); renderAll(); }
+function clearVehicle(){ ['v_target','v_vehicle','v_plate','v_registered','v_lastseen','v_location','v_notes'].forEach(id=>$(id).value=''); $('v_priority').value='Low'; }
+
+function saveSurv(){ const a=get(K.surv); a.unshift({date:$('s_date').value,target:$('s_target').value,location:$('s_location').value,vehicle:$('s_vehicle').value,people:$('s_people').value,activity:$('s_activity').value,follow:$('s_follow').value,notes:$('s_notes').value}); set(K.surv,a); clearSurv(); renderAll(); }
+function clearSurv(){ ['s_date','s_target','s_location','s_vehicle','s_people','s_activity','s_notes'].forEach(id=>$(id).value=''); $('s_follow').value='No'; }
+
+function savePlan(){ const a=get(K.plan); a.unshift({target:$('p_target').value,step:$('p_step').value,action:$('p_action').value,location:$('p_location').value,team:$('p_team').value,risk:$('p_risk').value,status:$('p_status').value,notes:$('p_notes').value}); set(K.plan,a); clearPlan(); renderAll(); }
+function clearPlan(){ ['p_target','p_step','p_action','p_location','p_team','p_notes'].forEach(id=>$(id).value=''); $('p_risk').value='Low'; $('p_status').value='Open'; }
+
+function saveNote(){ const a=get(K.notes); a.unshift({target:$('n_target').value,date:$('n_date').value,note:$('n_note').value}); set(K.notes,a); clearNote(); renderAll(); }
+function clearNote(){ ['n_target','n_date','n_note'].forEach(id=>$(id).value=''); }
+
+function renderOverview(){
+  const targets=get(K.targets), associates=get(K.associates), locations=get(K.locations), vehicles=get(K.vehicles), surv=get(K.surv), plan=get(K.plan);
+  $('statTargets').textContent=targets.filter(x=>x.status!=='Closed').length;
+  $('statAssociates').textContent=associates.length;
+  $('statLocations').textContent=locations.length;
+  $('statVehicles').textContent=vehicles.length;
+  $('statSurv').textContent=surv.length;
+  $('statActions').textContent=plan.filter(x=>x.status!=='Done').length;
+  const pri=targets.filter(x=>x.status!=='Closed').slice(0,5);
+  $('priorityPreview').innerHTML = pri.length ? pri.map((x,i)=>'<div class="listitem"><strong>'+esc(x.name||'Unnamed')+'</strong> '+pill(x.priority)+'<br><span class="small">'+esc(x.county||'')+' • Status: '+esc(x.status||'')+'</span></div>').join('') : 'No targets yet.';
+  const nxt=plan.filter(x=>x.status!=='Done').slice(0,5);
+  $('actionPreview').innerHTML = nxt.length ? nxt.map((x,i)=>'<div class="listitem"><strong>'+esc(x.target||'Unknown')+'</strong> • Step '+esc(x.step||'')+'<br><span class="small">'+esc(x.action||'')+' • '+esc(x.location||'')+'</span></div>').join('') : 'No action steps yet.';
+}
+function renderTargets(){ const a=get(K.targets); $('targetList').innerHTML = a.length ? a.map((x,i)=>'<div class="listitem"><strong>'+esc(x.name||'Unnamed')+'</strong> '+pill(x.priority)+'<br><span class="small">'+esc(x.county||'')+' • '+esc(x.charges||'')+' • '+esc(x.status||'')+'</span><br><span class="small">'+esc(x.address||'')+' • '+esc(x.phone||'')+'</span><div class="btnrow"><button class="action danger" data-del="'+K.targets+'" data-idx="'+i+'">Delete</button></div></div>').join('') : 'No targets yet.'; }
+function renderAssociates(){ const a=get(K.associates); $('associateList').innerHTML = a.length ? a.map((x,i)=>'<div class="listitem"><strong>'+esc(x.name||'Unnamed')+'</strong> '+pill(x.priority)+'<br><span class="small">Target: '+esc(x.target||'')+' • '+esc(x.relation||'')+'</span><br><span class="small">'+esc(x.phone||'')+' • '+esc(x.address||'')+'</span><div class="btnrow"><button class="action danger" data-del="'+K.associates+'" data-idx="'+i+'">Delete</button></div></div>').join('') : 'No associates yet.'; }
+function renderLocations(){ const a=get(K.locations); $('locationList').innerHTML = a.length ? a.map((x,i)=>'<div class="listitem"><strong>'+esc(x.name||'Location')+'</strong> '+pill(x.priority)+'<br><span class="small">Target: '+esc(x.target||'')+' • '+esc(x.type||'')+'</span><br><span class="small">'+esc(x.address||'')+' • Best time: '+esc(x.time||'')+'</span><div class="btnrow"><button class="action danger" data-del="'+K.locations+'" data-idx="'+i+'">Delete</button></div></div>').join('') : 'No locations yet.'; }
+function renderVehicles(){ const a=get(K.vehicles); $('vehicleList').innerHTML = a.length ? a.map((x,i)=>'<div class="listitem"><strong>'+esc(x.vehicle||'Vehicle')+'</strong> '+pill(x.priority)+'<br><span class="small">Target: '+esc(x.target||'')+' • Plate: '+esc(x.plate||'')+'</span><br><span class="small">Last seen: '+esc(x.lastseen||'')+' • '+esc(x.location||'')+'</span><div class="btnrow"><button class="action danger" data-del="'+K.vehicles+'" data-idx="'+i+'">Delete</button></div></div>').join('') : 'No vehicles yet.'; }
+function renderSurv(){ const a=get(K.surv); $('survList').innerHTML = a.length ? a.map((x,i)=>'<div class="listitem"><strong>'+esc(x.target||'Target')+'</strong> • '+esc(x.date||'')+'<br><span class="small">'+esc(x.location||'')+' • Vehicle: '+esc(x.vehicle||'')+'</span><br><span class="small">'+esc(x.activity||'')+' • Follow-up: '+esc(x.follow||'')+'</span><div class="btnrow"><button class="action danger" data-del="'+K.surv+'" data-idx="'+i+'">Delete</button></div></div>').join('') : 'No surveillance entries yet.'; }
+function renderPlan(){ const a=get(K.plan); $('planList').innerHTML = a.length ? a.map((x,i)=>'<div class="listitem"><strong>'+esc(x.target||'Target')+'</strong> • Step '+esc(x.step||'')+' '+pill(x.risk)+'<br><span class="small">'+esc(x.action||'')+' • '+esc(x.location||'')+'</span><br><span class="small">Team: '+esc(x.team||'')+' • Status: '+esc(x.status||'')+'</span><div class="btnrow"><button class="action danger" data-del="'+K.plan+'" data-idx="'+i+'">Delete</button></div></div>').join('') : 'No action steps yet.'; }
+function renderNotes(){ const a=get(K.notes); $('noteList').innerHTML = a.length ? a.map((x,i)=>'<div class="listitem"><strong>'+esc(x.target||'Target')+'</strong> • '+esc(x.date||'')+'<br><span class="small">'+esc(x.note||'')+'</span><div class="btnrow"><button class="action danger" data-del="'+K.notes+'" data-idx="'+i+'">Delete</button></div></div>').join('') : 'No notes yet.'; }
+function renderAll(){ renderOverview(); renderTargets(); renderAssociates(); renderLocations(); renderVehicles(); renderSurv(); renderPlan(); renderNotes(); }
+
+document.getElementById('saveTargetBtn').addEventListener('click', saveTarget);
+document.getElementById('clearTargetBtn').addEventListener('click', clearTarget);
+document.getElementById('saveAssociateBtn').addEventListener('click', saveAssociate);
+document.getElementById('clearAssociateBtn').addEventListener('click', clearAssociate);
+document.getElementById('saveLocationBtn').addEventListener('click', saveLocation);
+document.getElementById('clearLocationBtn').addEventListener('click', clearLocation);
+document.getElementById('saveVehicleBtn').addEventListener('click', saveVehicle);
+document.getElementById('clearVehicleBtn').addEventListener('click', clearVehicle);
+document.getElementById('saveSurvBtn').addEventListener('click', saveSurv);
+document.getElementById('clearSurvBtn').addEventListener('click', clearSurv);
+document.getElementById('savePlanBtn').addEventListener('click', savePlan);
+document.getElementById('clearPlanBtn').addEventListener('click', clearPlan);
+document.getElementById('saveNoteBtn').addEventListener('click', saveNote);
+document.getElementById('clearNoteBtn').addEventListener('click', clearNote);
+document.getElementById('exportBtn').addEventListener('click', exportData);
+document.getElementById('importBtn').addEventListener('click', importData);
+document.getElementById('wipeBtn').addEventListener('click', wipeAll);
+
+renderAll();
+})();
+</script>
+</body>
+</html>

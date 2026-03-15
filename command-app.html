@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClearPath Command App v2</title>
+<style>
+:root{--navy:#0D2F5B;--gold:#C8A24A;--bg:#eef2f6;--white:#fff;--red:#b91c1c;--green:#166534}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#1f2937}
+header{background:var(--navy);color:#fff;padding:14px;position:sticky;top:0;z-index:20}
+header h1{margin:0;font-size:20px}
+header p{margin:4px 0 0;font-size:12px;opacity:.9}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px;background:#dbe3ec;position:sticky;top:64px;z-index:19}
+.tabbtn{border:none;border-radius:10px;padding:10px 6px;background:#fff;color:var(--navy);font-weight:700;font-size:12px}
+.tabbtn.active{background:var(--navy);color:#fff}
+main{padding:12px}
+.tab{display:none}.tab.active{display:block}
+.card{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card h2{margin:0 0 10px;color:var(--navy);font-size:18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:12px;font-weight:700;margin-bottom:4px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cdd5df;border-radius:10px;font-size:14px}
+textarea{min-height:72px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button.action{border:none;border-radius:10px;padding:10px 14px;font-weight:700}
+.save{background:var(--navy);color:#fff}.clear{background:#ddd}.danger{background:var(--red);color:#fff}.export{background:var(--gold)}
+.listitem{border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin-top:8px;background:#fafafa}
+.small{font-size:12px;color:#555}
+.pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700}
+.low{background:#dcfce7;color:var(--green)} .mod{background:#fef3c7;color:#92400e} .high{background:#fee2e2;color:var(--red)}
+.statwrap{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat{background:#f8fafc;border-left:5px solid var(--gold);border-radius:12px;padding:12px}
+.stat .num{font-size:22px;font-weight:700;color:var(--navy)}
+.footer-note{font-size:11px;color:#666;text-align:center;padding:16px}
+.totalbox{font-weight:700;color:var(--navy);font-size:18px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.tabs{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>ClearPath Command App v2</h1>
+  <p>Bail • Recovery • Payments • Mileage • Receipts</p>
+</header>
+
+<div class="tabs">
+  <button class="tabbtn active" data-tab="dashboard">Dashboard</button>
+  <button class="tabbtn" data-tab="bonds">Bonds</button>
+  <button class="tabbtn" data-tab="payments">Payments</button>
+  <button class="tabbtn" data-tab="mileage">Mileage</button>
+  <button class="tabbtn" data-tab="receipts">Receipts</button>
+  <button class="tabbtn" data-tab="court">Court</button>
+  <button class="tabbtn" data-tab="skips">Skips</button>
+  <button class="tabbtn" data-tab="leads">Leads</button>
+</div>
+
+<main>
+<section id="dashboard" class="tab active">
+  <div class="card">
+    <h2>Today’s Snapshot</h2>
+    <div class="statwrap">
+      <div class="stat"><div class="small">Active Bonds</div><div class="num" id="statActive">0</div></div>
+      <div class="stat"><div class="small">Leads</div><div class="num" id="statLeads">0</div></div>
+      <div class="stat"><div class="small">Payments Received</div><div class="num" id="statPayments">$0</div></div>
+      <div class="stat"><div class="small">Business Expenses</div><div class="num" id="statExpenses">$0</div></div>
+      <div class="stat"><div class="small">Mileage Miles</div><div class="num" id="statMileage">0</div></div>
+      <div class="stat"><div class="small">Open Skips</div><div class="num" id="statSkips">0</div></div>
+    </div>
+    <div class="btnrow">
+      <button class="action export" id="exportBtn">Export Backup</button>
+      <button class="action clear" id="importBtn">Import Backup</button>
+      <button class="action danger" id="wipeBtn">Wipe App Data</button>
+    </div>
+  </div>
+  <div class="card"><h2>Upcoming Court Dates</h2><div id="courtPreview" class="small">No court dates yet.</div></div>
+  <div class="card"><h2>High-Risk Bonds</h2><div id="riskPreview" class="small">No high-risk bonds yet.</div></div>
+</section>
+
+<section id="bonds" class="tab">
+  <div class="card">
+    <h2>Bond Entry</h2>
+    <div class="grid">
+      <div><label>Defendant</label><input id="bond_defendant"></div>
+      <div><label>Bond Amount</label><input id="bond_amount" type="number" step="0.01"></div>
+      <div><label>Premium</label><input id="bond_premium" type="number" step="0.01"></div>
+      <div><label>County</label><input id="bond_county"></div>
+      <div><label>Court Date</label><input id="bond_court" type="date"></div>
+      <div><label>Indemnitor</label><input id="bond_indemnitor"></div>
+      <div><label>Phone</label><input id="bond_phone"></div>
+      <div><label>Balance Owed</label><input id="bond_balance" type="number" step="0.01"></div>
+      <div><label>Risk Level</label><select id="bond_risk"><option>Low</option><option>Moderate</option><option>High</option></select></div>
+      <div><label>Status</label><select id="bond_status"><option>Active</option><option>Court Today</option><option>Missed Court</option><option>Closed</option></select></div>
+      <div style="grid-column:1/-1"><label>Notes</label><textarea id="bond_notes"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="saveBondBtn">Save Bond</button>
+      <button class="action clear" id="clearBondBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card"><h2>Bond List</h2><div id="bondList" class="small">No bonds yet.</div></div>
+</section>
+
+<section id="payments" class="tab">
+  <div class="card">
+    <h2>Payment Received</h2>
+    <div class="grid">
+      <div><label>Date</label><input id="pay_date" type="date"></div>
+      <div><label>Defendant</label><input id="pay_defendant"></div>
+      <div><label>Paid By</label><input id="pay_paidby" placeholder="Defendant / Co-signer / Other"></div>
+      <div><label>Amount</label><input id="pay_amount" type="number" step="0.01"></div>
+      <div><label>Method</label><select id="pay_method"><option>Cash</option><option>Card</option><option>Cash App</option><option>Venmo</option><option>Zelle</option><option>Check</option><option>Other</option></select></div>
+      <div><label>County</label><input id="pay_county"></div>
+      <div><label>Receipt / Reference #</label><input id="pay_ref"></div>
+      <div><label>Applied To</label><select id="pay_applied"><option>Premium</option><option>Balance</option><option>Collateral</option><option>Other</option></select></div>
+      <div style="grid-column:1/-1"><label>Notes</label><textarea id="pay_notes"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="savePaymentBtn">Save Payment</button>
+      <button class="action clear" id="clearPaymentBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Payment Totals</h2>
+    <div class="totalbox" id="paymentTotal">$0.00 total received</div>
+    <div id="paymentList" class="small">No payments yet.</div>
+  </div>
+</section>
+
+<section id="mileage" class="tab">
+  <div class="card">
+    <h2>Mileage Entry</h2>
+    <div class="grid">
+      <div><label>Date</label><input id="mile_date" type="date"></div>
+      <div><label>Purpose</label><input id="mile_purpose" placeholder="Court / Jail / Attorney / Recovery"></div>
+      <div><label>Start Odometer</label><input id="mile_start" type="number" step="0.1"></div>
+      <div><label>End Odometer</label><input id="mile_end" type="number" step="0.1"></div>
+      <div><label>From</label><input id="mile_from"></div>
+      <div><label>To</label><input id="mile_to"></div>
+      <div style="grid-column:1/-1"><label>Notes</label><textarea id="mile_notes"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="saveMileageBtn">Save Mileage</button>
+      <button class="action clear" id="clearMileageBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Mileage Totals</h2>
+    <div class="totalbox" id="mileageTotal">0.0 miles</div>
+    <div id="mileageList" class="small">No mileage entries yet.</div>
+  </div>
+</section>
+
+<section id="receipts" class="tab">
+  <div class="card">
+    <h2>Business Expense / Receipt</h2>
+    <div class="grid">
+      <div><label>Date</label><input id="rec_date" type="date"></div>
+      <div><label>Vendor</label><input id="rec_vendor"></div>
+      <div><label>Category</label><select id="rec_category"><option>Fuel</option><option>Food</option><option>Supplies</option><option>Equipment</option><option>Phone</option><option>Advertising</option><option>Court / Jail</option><option>Office</option><option>Travel</option><option>Other</option></select></div>
+      <div><label>Amount</label><input id="rec_amount" type="number" step="0.01"></div>
+      <div><label>Payment Method</label><select id="rec_method"><option>Cash</option><option>Card</option><option>Bank</option><option>Other</option></select></div>
+      <div><label>Receipt # / Note</label><input id="rec_ref"></div>
+      <div style="grid-column:1/-1"><label>Description</label><textarea id="rec_notes"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="saveReceiptBtn">Save Receipt</button>
+      <button class="action clear" id="clearReceiptBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Expense Totals</h2>
+    <div class="totalbox" id="receiptTotal">$0.00 total expenses</div>
+    <div id="receiptList" class="small">No receipts yet.</div>
+  </div>
+</section>
+
+<section id="court" class="tab">
+  <div class="card">
+    <h2>Court Reminder Entry</h2>
+    <div class="grid">
+      <div><label>Defendant</label><input id="court_defendant"></div>
+      <div><label>Court Date</label><input id="court_date" type="date"></div>
+      <div><label>County</label><input id="court_county"></div>
+      <div><label>Courtroom</label><input id="court_room"></div>
+      <div><label>48hr Reminder Sent</label><select id="court_48"><option>No</option><option>Yes</option></select></div>
+      <div><label>24hr Reminder Sent</label><select id="court_24"><option>No</option><option>Yes</option></select></div>
+      <div><label>Outcome</label><select id="court_outcome"><option>Pending</option><option>Appeared</option><option>Missed</option></select></div>
+      <div style="grid-column:1/-1"><label>Notes</label><textarea id="court_notes"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="saveCourtBtn">Save Court Entry</button>
+      <button class="action clear" id="clearCourtBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card"><h2>Court Calendar</h2><div id="courtList" class="small">No court entries yet.</div></div>
+</section>
+
+<section id="skips" class="tab">
+  <div class="card">
+    <h2>Skip Tracker Entry</h2>
+    <div class="grid">
+      <div><label>Defendant</label><input id="skip_defendant"></div>
+      <div><label>Last Address</label><input id="skip_address"></div>
+      <div><label>Vehicle</label><input id="skip_vehicle"></div>
+      <div><label>Employer</label><input id="skip_employer"></div>
+      <div><label>Associates</label><input id="skip_associates"></div>
+      <div><label>Lead Source</label><input id="skip_source"></div>
+      <div><label>Priority</label><select id="skip_priority"><option>Low</option><option>Medium</option><option>High</option></select></div>
+      <div><label>Status</label><select id="skip_status"><option>Open</option><option>Working</option><option>Located</option><option>Closed</option></select></div>
+      <div style="grid-column:1/-1"><label>Notes</label><textarea id="skip_notes"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="saveSkipBtn">Save Skip</button>
+      <button class="action clear" id="clearSkipBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card"><h2>Open Skip Board</h2><div id="skipList" class="small">No skip entries yet.</div></div>
+</section>
+
+<section id="leads" class="tab">
+  <div class="card">
+    <h2>Lead Intake</h2>
+    <div class="grid">
+      <div><label>Date</label><input id="lead_date" type="date"></div>
+      <div><label>Caller Name</label><input id="lead_caller"></div>
+      <div><label>Caller Phone</label><input id="lead_phone"></div>
+      <div><label>Defendant</label><input id="lead_defendant"></div>
+      <div><label>Jail</label><input id="lead_jail"></div>
+      <div><label>Bond Amount</label><input id="lead_bond" type="number" step="0.01"></div>
+      <div><label>Charges</label><input id="lead_charges"></div>
+      <div><label>County</label><input id="lead_county"></div>
+      <div><label>Outcome</label><select id="lead_outcome"><option>New</option><option>Quoted</option><option>Bond Written</option><option>Lost</option></select></div>
+      <div style="grid-column:1/-1"><label>Notes</label><textarea id="lead_notes"></textarea></div>
+    </div>
+    <div class="btnrow">
+      <button class="action save" id="saveLeadBtn">Save Lead</button>
+      <button class="action clear" id="clearLeadBtn">Clear</button>
+    </div>
+  </div>
+  <div class="card"><h2>Saved Leads</h2><div id="leadList" class="small">No leads yet.</div></div>
+</section>
+</main>
+
+<div class="footer-note">Still local-browser based. Export backups regularly so your phone doesn’t pull a felony on your records.</div>
+
+<script>
+(function(){
+const K={leads:'cp2_leads',bonds:'cp2_bonds',court:'cp2_court',skips:'cp2_skips',payments:'cp2_payments',mileage:'cp2_mileage',receipts:'cp2_receipts'};
+const $=id=>document.getElementById(id);
+const get=k=>JSON.parse(localStorage.getItem(k)||'[]');
+const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const esc=s=>String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const money=v=>{ const n=Number(v||0); return isNaN(n)?'$0':n.toLocaleString(undefined,{style:'currency',currency:'USD'}); };
+const num=v=>{ const n=Number(v||0); return isNaN(n)?0:n; };
+const pill=(v,type='risk')=>{ const t=String(v||''); const l=t.toLowerCase(); let c='low'; if(l.includes('high')) c='high'; else if(l.includes('mod')||l.includes('medium')) c='mod'; return '<span class="pill '+c+'">'+esc(t)+'</span>'; };
+
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+  const tab=document.getElementById(id), btn=document.querySelector('.tabbtn[data-tab="'+id+'"]');
+  if(tab) tab.classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+document.querySelectorAll('.tabbtn').forEach(btn=>btn.addEventListener('click',()=>showTab(btn.dataset.tab)));
+
+function removeItem(key,idx){ const a=get(key); a.splice(idx,1); set(key,a); renderAll(); }
+document.addEventListener('click', e => {
+  if(e.target.matches('[data-del]')) removeItem(e.target.getAttribute('data-del'), Number(e.target.getAttribute('data-idx')));
+});
+
+function saveLead(){
+  const a=get(K.leads);
+  a.unshift({date:$('lead_date').value,caller:$('lead_caller').value,phone:$('lead_phone').value,defendant:$('lead_defendant').value,jail:$('lead_jail').value,bond:$('lead_bond').value,charges:$('lead_charges').value,county:$('lead_county').value,outcome:$('lead_outcome').value,notes:$('lead_notes').value});
+  set(K.leads,a); clearLead(); renderAll();
+}
+function clearLead(){ ['lead_date','lead_caller','lead_phone','lead_defendant','lead_jail','lead_bond','lead_charges','lead_county','lead_notes'].forEach(id=>$(id).value=''); $('lead_outcome').value='New'; }
+
+function saveBond(){
+  const a=get(K.bonds);
+  a.unshift({defendant:$('bond_defendant').value,amount:$('bond_amount').value,premium:$('bond_premium').value,county:$('bond_county').value,court:$('bond_court').value,indemnitor:$('bond_indemnitor').value,phone:$('bond_phone').value,balance:$('bond_balance').value,risk:$('bond_risk').value,status:$('bond_status').value,notes:$('bond_notes').value});
+  set(K.bonds,a); clearBond(); renderAll();
+}
+function clearBond(){ ['bond_defendant','bond_amount','bond_premium','bond_county','bond_court','bond_indemnitor','bond_phone','bond_balance','bond_notes'].forEach(id=>$(id).value=''); $('bond_risk').value='Low'; $('bond_status').value='Active'; }
+
+function saveCourt(){
+  const a=get(K.court);
+  a.unshift({defendant:$('court_defendant').value,date:$('court_date').value,county:$('court_county').value,room:$('court_room').value,r48:$('court_48').value,r24:$('court_24').value,outcome:$('court_outcome').value,notes:$('court_notes').value});
+  set(K.court,a); clearCourt(); renderAll();
+}
+function clearCourt(){ ['court_defendant','court_date','court_county','court_room','court_notes'].forEach(id=>$(id).value=''); $('court_48').value='No'; $('court_24').value='No'; $('court_outcome').value='Pending'; }
+
+function saveSkip(){
+  const a=get(K.skips);
+  a.unshift({defendant:$('skip_defendant').value,address:$('skip_address').value,vehicle:$('skip_vehicle').value,employer:$('skip_employer').value,associates:$('skip_associates').value,source:$('skip_source').value,priority:$('skip_priority').value,status:$('skip_status').value,notes:$('skip_notes').value});
+  set(K.skips,a); clearSkip(); renderAll();
+}
+function clearSkip(){ ['skip_defendant','skip_address','skip_vehicle','skip_employer','skip_associates','skip_source','skip_notes'].forEach(id=>$(id).value=''); $('skip_priority').value='Low'; $('skip_status').value='Open'; }
+
+function savePayment(){
+  const a=get(K.payments);
+  a.unshift({date:$('pay_date').value,defendant:$('pay_defendant').value,paidby:$('pay_paidby').value,amount:$('pay_amount').value,method:$('pay_method').value,county:$('pay_county').value,ref:$('pay_ref').value,applied:$('pay_applied').value,notes:$('pay_notes').value});
+  set(K.payments,a); clearPayment(); renderAll();
+}
+function clearPayment(){ ['pay_date','pay_defendant','pay_paidby','pay_amount','pay_county','pay_ref','pay_notes'].forEach(id=>$(id).value=''); $('pay_method').value='Cash'; $('pay_applied').value='Premium'; }
+
+function saveMileage(){
+  const start=num($('mile_start').value), end=num($('mile_end').value), miles=Math.max(0,end-start);
+  const a=get(K.mileage);
+  a.unshift({date:$('mile_date').value,purpose:$('mile_purpose').value,start:start,end:end,miles:miles,from:$('mile_from').value,to:$('mile_to').value,notes:$('mile_notes').value});
+  set(K.mileage,a); clearMileage(); renderAll();
+}
+function clearMileage(){ ['mile_date','mile_purpose','mile_start','mile_end','mile_from','mile_to','mile_notes'].forEach(id=>$(id).value=''); }
+
+function saveReceipt(){
+  const a=get(K.receipts);
+  a.unshift({date:$('rec_date').value,vendor:$('rec_vendor').value,category:$('rec_category').value,amount:$('rec_amount').value,method:$('rec_method').value,ref:$('rec_ref').value,notes:$('rec_notes').value});
+  set(K.receipts,a); clearReceipt(); renderAll();
+}
+function clearReceipt(){ ['rec_date','rec_vendor','rec_amount','rec_ref','rec_notes'].forEach(id=>$(id).value=''); $('rec_category').value='Fuel'; $('rec_method').value='Cash'; }
+
+function exportData(){
+  const payload={leads:get(K.leads),bonds:get(K.bonds),court:get(K.court),skips:get(K.skips),payments:get(K.payments),mileage:get(K.mileage),receipts:get(K.receipts)};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='clearpath-command-v2-backup.json'; a.click();
+}
+function importData(){
+  const input=document.createElement('input'); input.type='file'; input.accept='.json,application/json';
+  input.onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const d=JSON.parse(r.result);
+        Object.keys(K).forEach(k=>set(K[k], d[k]||[]));
+        renderAll(); alert('Backup imported.');
+      }catch(err){ alert('Import failed.'); }
+    };
+    r.readAsText(f);
+  };
+  input.click();
+}
+function wipeAll(){ if(confirm('Delete all app data?')){ Object.values(K).forEach(k=>localStorage.removeItem(k)); renderAll(); } }
+
+function renderLeads(){
+  const a=get(K.leads);
+  $('leadList').innerHTML = a.length ? a.map((x,i)=>`<div class="listitem"><strong>${esc(x.defendant||'Unnamed')}</strong> • ${esc(x.jail||'')}<br><span class="small">${esc(x.caller||'')} • ${esc(x.phone||'')} • ${money(x.bond)}</span><br><span class="small">${esc(x.county||'')} • ${esc(x.outcome||'')}</span><div class="btnrow"><button class="action danger" data-del="${K.leads}" data-idx="${i}">Delete</button></div></div>`).join('') : 'No leads yet.';
+}
+function renderBonds(){
+  const a=get(K.bonds);
+  $('bondList').innerHTML = a.length ? a.map((x,i)=>`<div class="listitem"><strong>${esc(x.defendant||'Unnamed')}</strong> ${pill(x.risk)}<br><span class="small">Bond: ${money(x.amount)} • Premium: ${money(x.premium)} • Balance: ${money(x.balance)}</span><br><span class="small">${esc(x.county||'')} • Court: ${esc(x.court||'')}</span><br><span class="small">Indemnitor: ${esc(x.indemnitor||'')} • ${esc(x.phone||'')}</span><div class="btnrow"><button class="action danger" data-del="${K.bonds}" data-idx="${i}">Delete</button></div></div>`).join('') : 'No bonds yet.';
+}
+function renderCourt(){
+  const a=get(K.court).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  $('courtList').innerHTML = a.length ? a.map((x,i)=>`<div class="listitem"><strong>${esc(x.defendant||'Unnamed')}</strong> • ${esc(x.date||'')}<br><span class="small">${esc(x.county||'')} • Room: ${esc(x.room||'')} • Outcome: ${esc(x.outcome||'')}</span><br><span class="small">48hr: ${esc(x.r48||'')} • 24hr: ${esc(x.r24||'')}</span><div class="btnrow"><button class="action danger" data-del="${K.court}" data-idx="${i}">Delete</button></div></div>`).join('') : 'No court entries yet.';
+}
+function renderSkips(){
+  const a=get(K.skips);
+  $('skipList').innerHTML = a.length ? a.map((x,i)=>`<div class="listitem"><strong>${esc(x.defendant||'Unnamed')}</strong> ${pill(x.priority)}<br><span class="small">${esc(x.address||'')} • ${esc(x.vehicle||'')}</span><br><span class="small">Employer: ${esc(x.employer||'')} • Source: ${esc(x.source||'')}</span><br><span class="small">Status: ${esc(x.status||'')}</span><div class="btnrow"><button class="action danger" data-del="${K.skips}" data-idx="${i}">Delete</button></div></div>`).join('') : 'No skip entries yet.';
+}
+function renderPayments(){
+  const a=get(K.payments);
+  const total=a.reduce((s,x)=>s+num(x.amount),0);
+  $('paymentTotal').textContent=`${money(total)} total received`;
+  $('paymentList').innerHTML = a.length ? a.map((x,i)=>`<div class="listitem"><strong>${esc(x.defendant||'Unnamed')}</strong> • ${money(x.amount)}<br><span class="small">${esc(x.date||'')} • Paid by: ${esc(x.paidby||'')} • ${esc(x.method||'')}</span><br><span class="small">${esc(x.applied||'')} • Ref: ${esc(x.ref||'')}</span><div class="btnrow"><button class="action danger" data-del="${K.payments}" data-idx="${i}">Delete</button></div></div>`).join('') : 'No payments yet.';
+}
+function renderMileage(){
+  const a=get(K.mileage);
+  const total=a.reduce((s,x)=>s+num(x.miles),0);
+  $('mileageTotal').textContent=`${total.toFixed(1)} miles`;
+  $('mileageList').innerHTML = a.length ? a.map((x,i)=>`<div class="listitem"><strong>${esc(x.purpose||'Trip')}</strong> • ${x.miles.toFixed(1)} miles<br><span class="small">${esc(x.date||'')} • ${esc(x.from||'')} → ${esc(x.to||'')}</span><br><span class="small">Odo: ${esc(x.start)} to ${esc(x.end)}</span><div class="btnrow"><button class="action danger" data-del="${K.mileage}" data-idx="${i}">Delete</button></div></div>`).join('') : 'No mileage entries yet.';
+}
+function renderReceipts(){
+  const a=get(K.receipts);
+  const total=a.reduce((s,x)=>s+num(x.amount),0);
+  $('receiptTotal').textContent=`${money(total)} total expenses`;
+  $('receiptList').innerHTML = a.length ? a.map((x,i)=>`<div class="listitem"><strong>${esc(x.vendor||'Vendor')}</strong> • ${money(x.amount)}<br><span class="small">${esc(x.date||'')} • ${esc(x.category||'')} • ${esc(x.method||'')}</span><br><span class="small">${esc(x.ref||'')} ${x.notes? '• '+esc(x.notes):''}</span><div class="btnrow"><button class="action danger" data-del="${K.receipts}" data-idx="${i}">Delete</button></div></div>`).join('') : 'No receipts yet.';
+}
+function renderDash(){
+  const bonds=get(K.bonds), leads=get(K.leads), court=get(K.court), skips=get(K.skips).filter(x=>x.status!=='Closed'&&x.status!=='Located');
+  const payments=get(K.payments), receipts=get(K.receipts), mileage=get(K.mileage);
+  $('statActive').textContent=bonds.filter(x=>x.status!=='Closed').length;
+  $('statLeads').textContent=leads.length;
+  $('statPayments').textContent=money(payments.reduce((s,x)=>s+num(x.amount),0));
+  $('statExpenses').textContent=money(receipts.reduce((s,x)=>s+num(x.amount),0));
+  $('statMileage').textContent=mileage.reduce((s,x)=>s+num(x.miles),0).toFixed(1);
+  $('statSkips').textContent=skips.length;
+  const upcoming=court.filter(x=>x.date).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,5);
+  $('courtPreview').innerHTML=upcoming.length? upcoming.map(x=>`<div class="listitem"><strong>${esc(x.defendant)}</strong> • ${esc(x.date)}<br><span class="small">${esc(x.county||'')} • ${esc(x.outcome||'Pending')}</span></div>`).join(''):'No court dates yet.';
+  const high=bonds.filter(x=>String(x.risk).toLowerCase()==='high');
+  $('riskPreview').innerHTML=high.length? high.map(x=>`<div class="listitem"><strong>${esc(x.defendant)}</strong> ${pill(x.risk)}<br><span class="small">${money(x.amount)} • Court: ${esc(x.court||'')}</span></div>`).join(''):'No high-risk bonds yet.';
+}
+function renderAll(){ renderDash(); renderLeads(); renderBonds(); renderCourt(); renderSkips(); renderPayments(); renderMileage(); renderReceipts(); }
+
+$('saveLeadBtn').addEventListener('click', saveLead);
+$('clearLeadBtn').addEventListener('click', clearLead);
+$('saveBondBtn').addEventListener('click', saveBond);
+$('clearBondBtn').addEventListener('click', clearBond);
+$('saveCourtBtn').addEventListener('click', saveCourt);
+$('clearCourtBtn').addEventListener('click', clearCourt);
+$('saveSkipBtn').addEventListener('click', saveSkip);
+$('clearSkipBtn').addEventListener('click', clearSkip);
+$('savePaymentBtn').addEventListener('click', savePayment);
+$('clearPaymentBtn').addEventListener('click', clearPayment);
+$('saveMileageBtn').addEventListener('click', saveMileage);
+$('clearMileageBtn').addEventListener('click', clearMileage);
+$('saveReceiptBtn').addEventListener('click', saveReceipt);
+$('clearReceiptBtn').addEventListener('click', clearReceipt);
+$('exportBtn').addEventListener('click', exportData);
+$('importBtn').addEventListener('click', importData);
+$('wipeBtn').addEventListener('click', wipeAll);
+
+renderAll();
+})();
+</script>
+</body>
+</html>
